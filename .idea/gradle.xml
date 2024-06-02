@@ -12,6 +12,9 @@
             <option value="$PROJECT_DIR$/particleview/compose" />
             <option value="$PROJECT_DIR$/particleview/core" />
             <option value="$PROJECT_DIR$/particleview/xml" />
+            <option value="$PROJECT_DIR$/sample" />
+            <option value="$PROJECT_DIR$/sample/compose" />
+            <option value="$PROJECT_DIR$/sample/xml" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

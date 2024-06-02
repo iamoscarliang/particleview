@@ -14,6 +14,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ParticleView"
+include(":sample:xml")
+include(":sample:compose")
 include(":particleview:core")
 include(":particleview:xml")
 include(":particleview:compose")
