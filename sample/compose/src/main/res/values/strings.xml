@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">ParticleView-Compose</string>
+    <string name="snow">Snow</string>
+    <string name="explosion">Explosion</string>
+    <string name="confetti">Confetti</string>
+    <string name="poker">Poker</string>
+    <string name="rain">Rain</string>
+    <string name="bubble">Bubble</string>
 </resources>
