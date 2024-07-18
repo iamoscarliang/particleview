@@ -23,9 +23,9 @@ Add the dependency
 ```groovy
 dependencies {
     // XML
-    implementation 'com.github.iamoscarliang:particleview:xml:<version>'
+    implementation 'com.github.iamoscarliang.particleview:xml:<version>'
     // Compose
-    implementation 'com.github.iamoscarliang:particleview:compose:<version>'
+    implementation 'com.github.iamoscarliang.particleview:compose:<version>'
 }
 ```
 
