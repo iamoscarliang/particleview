@@ -13,9 +13,10 @@ import androidx.core.animation.addListener
 import com.oscarliang.particleview.core.DEFAULT_ACCEL_X
 import com.oscarliang.particleview.core.DEFAULT_ACCEL_Y
 import com.oscarliang.particleview.core.DEFAULT_ANGLE
-import com.oscarliang.particleview.core.DEFAULT_COUNT_PER_SECOND
 import com.oscarliang.particleview.core.DEFAULT_DURATION
-import com.oscarliang.particleview.core.DEFAULT_FADE_OUT_DURATION
+import com.oscarliang.particleview.core.DEFAULT_PARTICLE_DURATION
+import com.oscarliang.particleview.core.DEFAULT_PARTICLE_FADE_OUT_DURATION
+import com.oscarliang.particleview.core.DEFAULT_PARTICLE_PER_SECOND
 import com.oscarliang.particleview.core.DEFAULT_ROTATION
 import com.oscarliang.particleview.core.DEFAULT_ROTATION_SPEED
 import com.oscarliang.particleview.core.DEFAULT_SPEED
@@ -54,11 +55,10 @@ class ParticleView : View {
      * Top - 180, Right - 90, Bottom - 0, Left - 270
      * @param rotation - the start rotation of the particle. Range from [0, 360]
      * @param rotationSpeed - the rotation speed of the particle rotating in (degree / per second)
-     * @param countPerSecond - the count of particle emit per second
+     * @param particleDuration - the duration of the individual particle
+     * @param particleFadeOutDuration - the duration of the fade out effect of particle
+     * @param particlePerSecond - the amount of particle being emitted per second
      * @param duration - the duration of the animation
-     * @param fadeOutDuration - the fade out duration at the end of animation
-     * @param fadeOutEnable - controls the fade out effect at the end of animation. When false,
-     * the particle will disappear immediately and the fadeOutDuration has no effect
      * @param onParticleClickListener - callback being executed when any particle is clicked
      * @param onAnimationEndListener - callback being executed when end of the animation
      */
@@ -73,13 +73,16 @@ class ParticleView : View {
         accelY: FloatOffset = DEFAULT_ACCEL_Y,
         rotation: IntOffset = DEFAULT_ROTATION,
         rotationSpeed: FloatOffset = DEFAULT_ROTATION_SPEED,
-        countPerSecond: Int = DEFAULT_COUNT_PER_SECOND,
+        particleDuration: Long = DEFAULT_PARTICLE_DURATION,
+        particleFadeOutDuration: Long = DEFAULT_PARTICLE_FADE_OUT_DURATION,
+        particlePerSecond: Int = DEFAULT_PARTICLE_PER_SECOND,
         duration: Long = DEFAULT_DURATION,
-        fadeOutDuration: Long = DEFAULT_FADE_OUT_DURATION,
-        fadeOutEnable: Boolean = true,
         onParticleClickListener: (Particle) -> Unit = {},
         onAnimationEndListener: () -> Unit = {},
     ) {
+        this.duration = duration
+        this.currentMillis = 0
+
         val particleSystem = ParticleSystem(
             images = images.map {
                 ParticleImage(
@@ -96,18 +99,18 @@ class ParticleView : View {
             accelY = accelY,
             rotation = rotation,
             rotationSpeed = rotationSpeed,
-            countPerSecond = countPerSecond,
+            particleDuration = particleDuration,
+            particleFadeOutDuration = particleFadeOutDuration,
+            particlePerSecond = particlePerSecond,
             duration = duration,
-            fadeOutDuration = fadeOutDuration,
-            fadeOutEnable = fadeOutEnable,
             density = resources.displayMetrics.density
         )
+        this.particleSystem = particleSystem
 
         animator?.cancel()
-        val totalDuration = duration + if (fadeOutEnable) fadeOutDuration else 0
-        val animator = ValueAnimator.ofInt(0, totalDuration.toInt())
+        val animator = ValueAnimator.ofInt(0, duration.toInt())
             .apply {
-                this.duration = totalDuration
+                this.duration = duration
                 this.interpolator = LinearInterpolator()
                 addListener(onEnd = {
                     particleSystem.release()
@@ -123,11 +126,7 @@ class ParticleView : View {
                 }
             }
         animator.start()
-
-        this.particleSystem = particleSystem
         this.animator = animator
-        this.duration = duration
-        this.currentMillis = 0
 
         // Register the layout listener to get the real width and height
         viewTreeObserver.addOnGlobalLayoutListener(object :
@@ -152,10 +151,6 @@ class ParticleView : View {
         }
     }
 
-    /**
-     * Cancel the animation. The animation will jump to the end and play the
-     * fade out effect dependent on the fadeOutEnable is true or not
-     */
     fun cancel() {
         currentMillis = duration
         animator?.currentPlayTime = duration

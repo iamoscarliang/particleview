@@ -101,7 +101,7 @@ fun SnowView(
         angle = IntOffset(0),
         speed = FloatOffset(300.0f, 600.0f),
         accelY = FloatOffset(300.0f, 600.0f),
-        countPerSecond = 25,
+        particlePerSecond = 25,
         duration = 5000,
         onAnimationEndListener = onAnimationEnd
     )
@@ -160,7 +160,7 @@ fun ExplosionView(
         speed = FloatOffset(500.0f, 1000.0f),
         accelY = FloatOffset(1500.0f, 2000.0f),
         angle = IntOffset(160, 200),
-        countPerSecond = 50,
+        particlePerSecond = 50,
         duration = 5000,
         onAnimationEndListener = onAnimationEnd
     )
@@ -197,7 +197,7 @@ fun ConfettiView(
         accelY = FloatOffset(1000.0f, 1200.0f),
         angle = IntOffset(140, 160),
         rotationSpeed = FloatOffset(-30.0f, 30.0f),
-        countPerSecond = 20,
+        particlePerSecond = 20,
         duration = 5000,
         onAnimationEndListener = onAnimationEnd
     )
@@ -233,7 +233,7 @@ fun PokerView(
         accelX = FloatOffset(-500.0f, 500.0f),
         accelY = FloatOffset(200.0f, 300.0f),
         rotationSpeed = FloatOffset(-60.0f, 60.0f),
-        countPerSecond = 10,
+        particlePerSecond = 10,
         duration = 5000,
         onAnimationEndListener = onAnimationEnd
     )
@@ -264,7 +264,7 @@ fun RainView(
         angle = IntOffset(-30),
         speed = FloatOffset(3000.0f, 4000.0f),
         rotation = IntOffset(210),
-        countPerSecond = 60,
+        particlePerSecond = 60,
         duration = 5000,
         onAnimationEndListener = {
             onAnimationEnd()
@@ -294,7 +294,7 @@ fun BubbleView(
         speed = FloatOffset(300.0f, 500.0f),
         accelY = FloatOffset(-1000.0f, -500.0f),
         rotationSpeed = FloatOffset(30.0f, 60.0f),
-        countPerSecond = 20,
+        particlePerSecond = 20,
         duration = 5000,
         onAnimationEndListener = {
             onAnimationEnd()

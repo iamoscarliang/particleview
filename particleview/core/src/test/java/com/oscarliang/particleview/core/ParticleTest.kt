@@ -21,6 +21,7 @@ class ParticleTest {
     private val density = 1.0f
 
     private lateinit var bitmap: Bitmap
+    private lateinit var paint: Paint
     private lateinit var particle: Particle
 
     @Before
@@ -29,6 +30,7 @@ class ParticleTest {
             every { width } returns size
             every { height } returns size
         }
+        paint = mockk<Paint>(relaxed = true)
         particle = Particle(
             image = ParticleImage(bitmap, size),
             startXMin = 0.0f,
@@ -47,7 +49,11 @@ class ParticleTest {
             rotationMax = 30,
             rotationSpeedMin = 30.0f,
             rotationSpeedMax = 30.0f,
-            density = density
+            duration = 500,
+            fadeOutDuration = 200,
+            density = density,
+            onParticleEnd = {},
+            paint = paint
         )
     }
 
@@ -115,12 +121,24 @@ class ParticleTest {
         assertEquals(particle.rotatation, 36.0f)
     }
 
+
+    @Test
+    fun testFadeOut() {
+        particle.update(500)
+        verify { paint.alpha = 255 }
+
+        particle.update(100)
+        verify { paint.alpha = 127 }
+
+        particle.update(100)
+        verify { paint.alpha = 0 }
+    }
+
     @Test
     fun testDraw() {
         val canvas = mockk<Canvas>(relaxed = true)
-        val paint = mockk<Paint>(relaxed = true)
         particle.update(100)
-        particle.draw(canvas, paint)
+        particle.draw(canvas)
 
         verify { canvas.save() }
         verify { canvas.translate(0.1f - particle.width / 2, 10.1f - particle.height / 2) }

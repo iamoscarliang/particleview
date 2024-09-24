@@ -11,23 +11,27 @@ import kotlin.random.Random
 
 class Particle(
     val image: ParticleImage,
-    startXMin: Float,
-    startXMax: Float,
-    startYMin: Float,
-    startYMax: Float,
-    speedMin: Float,
-    speedMax: Float,
-    accelXMin: Float,
-    accelXMax: Float,
-    accelYMin: Float,
-    accelYMax: Float,
-    angleMin: Int,
-    angleMax: Int,
-    rotationMin: Int,
-    rotationMax: Int,
-    rotationSpeedMin: Float,
-    rotationSpeedMax: Float,
-    density: Float
+    val startXMin: Float,
+    val startXMax: Float,
+    val startYMin: Float,
+    val startYMax: Float,
+    val speedMin: Float,
+    val speedMax: Float,
+    val accelXMin: Float,
+    val accelXMax: Float,
+    val accelYMin: Float,
+    val accelYMax: Float,
+    val angleMin: Int,
+    val angleMax: Int,
+    val rotationMin: Int,
+    val rotationMax: Int,
+    val rotationSpeedMin: Float,
+    val rotationSpeedMax: Float,
+    val duration: Long,
+    val fadeOutDuration: Long,
+    val density: Float,
+    val onParticleEnd: (Particle) -> Unit,
+    val paint: Paint = Paint()
 ) {
 
     val width: Float = image.size * density
@@ -42,8 +46,13 @@ class Particle(
     var accelY: Float = 0.0f
     var rotatation: Float = 0.0f
     var rotationSpeed = 0.0f
+    private var currentMillis = 0L
 
     init {
+        reset()
+    }
+
+    fun reset() {
         val speed = Random.nextFloatSafely(speedMin, speedMax)
         val angle = toRadians(Random.nextIntSafely(angleMin, angleMax).toDouble())
         speedX = speed * sin(angle).toFloat()
@@ -54,6 +63,8 @@ class Particle(
         positionY = Random.nextFloatSafely(startYMin, startYMax) - height / 2
         rotatation = Random.nextIntSafely(rotationMin, rotationMax).toFloat()
         rotationSpeed = Random.nextFloatSafely(rotationSpeedMin, rotationSpeedMax)
+        paint.reset()
+        currentMillis = 0L
     }
 
     fun update(elapsedMillis: Long) {
@@ -62,9 +73,22 @@ class Particle(
         positionX += speedX / 1000 * elapsedMillis
         positionY += speedY / 1000 * elapsedMillis
         rotatation += rotationSpeed / 1000 * elapsedMillis
+        currentMillis += elapsedMillis
+
+        // Update alpha base on fade percentage
+        if (currentMillis >= duration) {
+            val fadePercent = (currentMillis - duration) * 1.0f / fadeOutDuration
+            paint.alpha = (255 * (1 - fadePercent)).toInt()
+        }
+
+        // Remove and recycle the particle when reach total duration
+        if (currentMillis >= duration + fadeOutDuration) {
+            onParticleEnd(this)
+            currentMillis = 0L
+        }
     }
 
-    fun draw(canvas: Canvas, paint: Paint) {
+    fun draw(canvas: Canvas) {
         canvas.save()
         canvas.translate(positionX, positionY)
         canvas.rotate(rotatation, width / 2, height / 2)

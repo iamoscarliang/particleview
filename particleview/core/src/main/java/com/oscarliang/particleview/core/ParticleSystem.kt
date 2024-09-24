@@ -1,60 +1,69 @@
 package com.oscarliang.particleview.core
 
 import android.graphics.Canvas
-import android.graphics.Paint
-import androidx.annotation.VisibleForTesting
 import com.oscarliang.particleview.core.model.FloatOffset
 import com.oscarliang.particleview.core.model.IntOffset
 import kotlin.random.Random
 
 class ParticleSystem(
     val images: List<ParticleImage>,
-    var startX: FloatOffset,
-    var startY: FloatOffset,
-    var speed: FloatOffset,
-    var accelX: FloatOffset,
-    var accelY: FloatOffset,
-    var angle: IntOffset,
-    var rotation: IntOffset,
-    var rotationSpeed: FloatOffset,
-    var countPerSecond: Int,
-    var duration: Long,
-    var fadeOutDuration: Long,
-    var fadeOutEnable: Boolean,
-    var density: Float,
-    val paint: Paint = Paint()
+    val startX: FloatOffset,
+    val startY: FloatOffset,
+    val speed: FloatOffset,
+    val accelX: FloatOffset,
+    val accelY: FloatOffset,
+    val angle: IntOffset,
+    val rotation: IntOffset,
+    val rotationSpeed: FloatOffset,
+    val particleDuration: Long,
+    val particleFadeOutDuration: Long,
+    val particlePerSecond: Int,
+    val duration: Long,
+    val density: Float
 ) {
 
     var width: Int = 0
     var height: Int = 0
 
-    @VisibleForTesting
-    val particles = ArrayList<Particle>()
+    private val particles = mutableListOf<Particle>()
+    private val particlesPool = mutableListOf<Particle>()
+    private val particlesToRemove = mutableListOf<Particle>()
+
+    private var current = 0L
 
     fun update(currentMillis: Long, elapsedMillis: Long) {
-        val millisPerCount = 1000 / countPerSecond
-        if (currentMillis >= (particles.size + 1) * millisPerCount) {
-            addOneParticle()
+        val durationPerParticle = particleDuration + particleFadeOutDuration
+        if (currentMillis < duration - durationPerParticle) {
+            val millisPerParticle = 1000 / particlePerSecond
+            current += elapsedMillis
+            if (current >= millisPerParticle) {
+                particles.add(getOneParticle())
+                current = 0
+            }
         }
 
         particles.forEach { particle ->
             particle.update(elapsedMillis)
         }
-        if (fadeOutEnable && currentMillis >= duration) {
-            // Update particle's alpha base on fade duration percentage
-            val fadePercent = (currentMillis - duration) * 1.0f / fadeOutDuration
-            paint.alpha = (255 * (1 - fadePercent)).toInt()
-        }
+
+        // Remove the particle after updating
+        // to prevent index out of bounds, and
+        // recycle the particles being removed
+        particles.removeAll(particlesToRemove)
+        particlesPool.addAll(particlesToRemove)
+        particlesToRemove.clear()
     }
 
     fun draw(canvas: Canvas) {
         particles.forEach { particle ->
-            particle.draw(canvas, paint)
+            particle.draw(canvas)
         }
     }
 
     fun release() {
         particles.clear()
+        particlesPool.clear()
+        particlesToRemove.clear()
     }
 
     fun getParticleAt(x: Float, y: Float): Particle? {
@@ -66,8 +75,12 @@ class ParticleSystem(
         return null
     }
 
-    private fun addOneParticle() {
-        particles.add(
+    private fun getOneParticle() =
+        if (particlesPool.isNotEmpty()) {
+            val particle = particlesPool.removeAt(0)
+            particle.reset()
+            particle
+        } else {
             Particle(
                 image = images[Random.nextInt(images.size)],
                 startXMin = startX.startValue * width,
@@ -86,9 +99,11 @@ class ParticleSystem(
                 rotationMax = rotation.endValue,
                 rotationSpeedMin = rotationSpeed.startValue,
                 rotationSpeedMax = rotationSpeed.endValue,
+                duration = particleDuration,
+                fadeOutDuration = particleFadeOutDuration,
+                onParticleEnd = { particlesToRemove.add(it) },
                 density = density
             )
-        )
-    }
+        }
 
 }
