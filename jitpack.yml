@@ -1,4 +1,4 @@
 jdk:
   - openjdk17
 before_install:
-  - ./gradlew :library:publishReleasePublicationToMavenLocal
+  - ./gradlew publishToMavenLocal
