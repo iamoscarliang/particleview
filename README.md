@@ -102,7 +102,7 @@ Recycling mechanism has been added since [v1.2](https://github.com/iamoscarliang
 ParticleView use a pre-created object pool to store unused particles, when a particle finishing emitting, it will be added back to the pool and being reused next time.
 The mechanism can decrease the creation of particles, improving rendering efficiency, and preventing memory leak.
 
-<img src="https://github.com/iamoscarliang/particleview/blob/master/images/recycle_mechanism" width="600">
+<img src="https://github.com/iamoscarliang/particleview/blob/master/images/recycle_mechanism.png" width="600">
 
 ## :tada: Samples
 [XML](https://github.com/iamoscarliang/particleview/tree/master/sample/xml/src/main)
