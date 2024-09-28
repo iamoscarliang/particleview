@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
             accelY = FloatOffset(300.0f, 600.0f),
             particlePerSecond = 25,
             duration = 6000,
-            onAnimationEndListener = { showButton() }
+            onAnimationEnd = { showButton() }
         )
     }
 
@@ -161,7 +161,7 @@ class MainActivity : AppCompatActivity() {
             particleDuration = 1200,
             particlePerSecond = 50,
             duration = 5000,
-            onAnimationEndListener = { showButton() }
+            onAnimationEnd = { showButton() }
         )
     }
 
@@ -196,7 +196,7 @@ class MainActivity : AppCompatActivity() {
             particleFadeOutDuration = 300,
             particlePerSecond = 20,
             duration = 6000,
-            onAnimationEndListener = { showButton() }
+            onAnimationEnd = { showButton() }
         )
     }
 
@@ -229,7 +229,7 @@ class MainActivity : AppCompatActivity() {
             particleDuration = 1000,
             particlePerSecond = 10,
             duration = 5000,
-            onAnimationEndListener = { showButton() }
+            onAnimationEnd = { showButton() }
         )
     }
 
@@ -258,7 +258,7 @@ class MainActivity : AppCompatActivity() {
             particleFadeOutDuration = 300,
             particlePerSecond = 60,
             duration = 5000,
-            onAnimationEndListener = { showButton() }
+            onAnimationEnd = { showButton() }
         )
     }
 
@@ -283,7 +283,7 @@ class MainActivity : AppCompatActivity() {
             particleDuration = 1600,
             particlePerSecond = 20,
             duration = 8000,
-            onAnimationEndListener = { showButton() }
+            onAnimationEnd = { showButton() }
         )
     }
 

@@ -103,7 +103,7 @@ fun SnowView(
         accelY = FloatOffset(300.0f, 600.0f),
         particlePerSecond = 25,
         duration = 6000,
-        onAnimationEndListener = onAnimationEnd
+        onAnimationEnd = onAnimationEnd
     )
 }
 
@@ -163,7 +163,7 @@ fun ExplosionView(
         particleDuration = 1200,
         particlePerSecond = 50,
         duration = 5000,
-        onAnimationEndListener = onAnimationEnd
+        onAnimationEnd = onAnimationEnd
     )
 }
 
@@ -202,7 +202,7 @@ fun ConfettiView(
         particleFadeOutDuration = 300,
         particlePerSecond = 20,
         duration = 6000,
-        onAnimationEndListener = onAnimationEnd
+        onAnimationEnd = onAnimationEnd
     )
 }
 
@@ -239,7 +239,7 @@ fun PokerView(
         particleDuration = 1000,
         particlePerSecond = 10,
         duration = 5000,
-        onAnimationEndListener = onAnimationEnd
+        onAnimationEnd = onAnimationEnd
     )
 }
 
@@ -272,7 +272,7 @@ fun RainView(
         particleFadeOutDuration = 300,
         particlePerSecond = 60,
         duration = 5000,
-        onAnimationEndListener = {
+        onAnimationEnd = {
             onAnimationEnd()
         }
     )
@@ -303,7 +303,7 @@ fun BubbleView(
         particleDuration = 1600,
         particlePerSecond = 20,
         duration = 8000,
-        onAnimationEndListener = {
+        onAnimationEnd = {
             onAnimationEnd()
         }
     )

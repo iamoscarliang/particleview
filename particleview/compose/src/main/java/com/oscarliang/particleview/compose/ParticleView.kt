@@ -57,8 +57,8 @@ import kotlinx.coroutines.isActive
  * @param particlePerSecond - the amount of particle being emitted per second
  * @param duration - the duration of the animation
  * @param isRunning - controls the current state of the animation
- * @param onParticleClickListener - callback being executed when any particle is clicked
- * @param onAnimationEndListener - callback being executed when end of the animation
+ * @param onParticleClick - callback being executed when any particle is clicked
+ * @param onAnimationEnd - callback being executed when end of the animation
  */
 @Composable
 fun ParticleView(
@@ -77,8 +77,8 @@ fun ParticleView(
     particlePerSecond: Int = DEFAULT_PARTICLE_PER_SECOND,
     duration: Long = DEFAULT_DURATION,
     isRunning: Boolean = true,
-    onParticleClickListener: (Particle) -> Unit = {},
-    onAnimationEndListener: () -> Unit = {},
+    onParticleClick: (Particle) -> Unit = {},
+    onAnimationEnd: () -> Unit = {},
 ) {
 
     val resources = LocalContext.current.resources
@@ -122,7 +122,7 @@ fun ParticleView(
         while (isActive) {
             if (currentFrameMillis >= duration) {
                 particleSystem.release()
-                onAnimationEndListener()
+                onAnimationEnd()
                 break
             }
             withFrameMillis { frameMillis ->
@@ -145,7 +145,7 @@ fun ParticleView(
                     onPress = { position ->
                         val selected = particleSystem.getParticleAt(position.x, position.y)
                         if (selected != null) {
-                            onParticleClickListener(selected)
+                            onParticleClick(selected)
                         }
                     }
                 )

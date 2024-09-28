@@ -59,8 +59,8 @@ class ParticleView : View {
      * @param particleFadeOutDuration - the duration of the fade out effect of particle
      * @param particlePerSecond - the amount of particle being emitted per second
      * @param duration - the duration of the animation
-     * @param onParticleClickListener - callback being executed when any particle is clicked
-     * @param onAnimationEndListener - callback being executed when end of the animation
+     * @param onParticleClick - callback being executed when any particle is clicked
+     * @param onAnimationEnd - callback being executed when end of the animation
      */
     @SuppressLint("ClickableViewAccessibility", "UseCompatLoadingForDrawables")
     fun start(
@@ -77,8 +77,8 @@ class ParticleView : View {
         particleFadeOutDuration: Long = DEFAULT_PARTICLE_FADE_OUT_DURATION,
         particlePerSecond: Int = DEFAULT_PARTICLE_PER_SECOND,
         duration: Long = DEFAULT_DURATION,
-        onParticleClickListener: (Particle) -> Unit = {},
-        onAnimationEndListener: () -> Unit = {},
+        onParticleClick: (Particle) -> Unit = {},
+        onAnimationEnd: () -> Unit = {},
     ) {
         this.duration = duration
         this.currentMillis = 0
@@ -115,7 +115,7 @@ class ParticleView : View {
                 addListener(onEnd = {
                     particleSystem.release()
                     this@ParticleView.particleSystem = null
-                    onAnimationEndListener()
+                    onAnimationEnd()
                 })
                 addUpdateListener { animation ->
                     val totalMillis = animation.animatedValue as Int
@@ -144,7 +144,7 @@ class ParticleView : View {
             if (action == MotionEvent.ACTION_DOWN) {
                 val selected = particleSystem.getParticleAt(event.x, event.y)
                 if (selected != null) {
-                    onParticleClickListener(selected)
+                    onParticleClick(selected)
                 }
             }
             true
