@@ -53,7 +53,7 @@ particleView.start(
     startY = FloatOffset(0.0f, 1.0f),
     angle = IntOffset(-30, 30),
     speed = FloatOffset(300.0f, 600.0f),
-    countPerSecond = 20,
+    particlePerSecond = 20,
     duration = 5000
 )
 ```
@@ -72,7 +72,7 @@ ParticleView(
     startY = FloatOffset(0.0f, 1.0f),
     angle = IntOffset(-30, 30),
     speed = FloatOffset(300.0f, 600.0f),
-    countPerSecond = 20,
+    particlePerSecond = 20,
     duration = 5000
 )
 ```
@@ -87,13 +87,13 @@ ParticleView(
 - `angle` - the direction of the particle's speed. Range from [0, 360]. Top - 180, Right - 90, Bottom - 0, Left - 270
 - `rotation` - the start rotation of the particle. Range from [0, 360]
 - `rotationSpeed` - the rotation speed of the particle rotating in (degree / per second)
-- `countPerSecond` - the count of particle emit per second
+- `particleDuration` - the duration of the individual particle
+- `particleFadeOutDuration` - the duration of the fade out effect of particle
+- `particlePerSecond` - the amount of particle being emitted per second
 - `duration` - the duration of the animation
-- `fadeOutDuration` - the fade out duration at the end of animation
-- `fadeOutEnable` - controls the fade out effect at the end of animation. When false, the particle will disappear immediately and the fadeOutDuration has no effect
-- `isRunning` - controls the current state of the animation. When false, the animation will jump to the end and play the fade out effect dependent on the fadeOutEnable is true or not
-- `onParticleClickListener` - callback being executed when any particle is clicked
-- `onAnimationEndListener` - callback being executed when end of the animation
+- `isRunning` - controls the current state of the animation
+- `onParticleClick` - callback being executed when any particle is clicked
+- `onAnimationEnd` - callback being executed when end of the animation
 
 ## :tada: Samples
 [XML](https://github.com/iamoscarliang/particleview/tree/master/sample/xml/src/main)
