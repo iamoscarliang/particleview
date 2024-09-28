@@ -1,14 +1,14 @@
 <div align="center">
-<img src="https://github.com/iamoscarliang/particleview/blob/master/screenshots/feature_graph.gif" width="600">
+<img src="https://github.com/iamoscarliang/particleview/blob/master/images/showcase.gif" width="600">
 
 [![Build](https://github.com/iamoscarliang/particleview/workflows/Build/badge.svg)](https://github.com/iamoscarliang/particleview/actions)
 [![Version](https://jitpack.io/v/iamoscarliang/particleview.svg)](https://jitpack.io/#iamoscarliang/particleview)
 ![minSdk](https://img.shields.io/badge/minSdk-26-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-brightgreen)](https://github.com/iamoscarliang/particleview/blob/master/LICENSE)
 
-[Getting Started](#wrench-getting-started) • [How To Use](#computer-how-to-use) • [Samples](#tada-samples) • [License](#balance_scale-license)
+[Getting Started](#wrench-getting-started) • [How To Use](#computer-how-to-use) • [Features](#pushpin-features) • [Samples](#tada-samples) • [License](#balance_scale-license)
 
-**A lightweight particle effect animation for Android**
+**A lightweight particle effect for Android**
 </div>
 
 ---
@@ -95,10 +95,19 @@ ParticleView(
 - `onParticleClick` - callback being executed when any particle is clicked
 - `onAnimationEnd` - callback being executed when end of the animation
 
+## :pushpin: Features
+
+### Recycling
+Recycling mechanism has been added since [v1.2](https://github.com/iamoscarliang/particleview/releases/tag/1%2C2) to improve performance.
+ParticleView use a pre-created object pool to store unused particles, when a particle finishing emitting, it will be added back to the pool and being reused next time.
+The mechanism can decrease the creation of particles, improving rendering efficiency, and preventing memory leak.
+
+<img src="https://github.com/iamoscarliang/particleview/blob/master/images/recycle_mechanism" width="600">
+
 ## :tada: Samples
 [XML](https://github.com/iamoscarliang/particleview/tree/master/sample/xml/src/main)
 
 [Compose](https://github.com/iamoscarliang/particleview/tree/master/sample/compose/src/main)
 
 ## :balance_scale: License
- ParticleView is licensed under the [MIT license](https://github.com/iamoscarliang/particleview/blob/master/LICENSE)
+ParticleView is licensed under the [MIT license](https://github.com/iamoscarliang/particleview/blob/master/LICENSE)
