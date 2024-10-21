@@ -91,9 +91,9 @@ ParticleView(
 - `particleFadeOutDuration` - the duration of the fade out effect of particle
 - `particlePerSecond` - the amount of particle being emitted per second
 - `duration` - the duration of the animation
-- `isRunning` - controls the current state of the animation
-- `onParticleClick` - callback being executed when any particle is clicked
-- `onAnimationEnd` - callback being executed when end of the animation
+- `isPause` - pause or resume the animation
+- `isCancel` - cancel the animation
+- `onParticlesEnd` - callback being executed when end of animation or cancellation
 
 ## :pushpin: Features
 
@@ -103,6 +103,44 @@ ParticleView use a pre-created object pool to store unused particles, when a par
 The mechanism can decrease the creation of particles, improving rendering efficiency, and preventing memory leak.
 
 <img src="https://github.com/iamoscarliang/particleview/blob/master/images/recycle_mechanism.png" width="600">
+
+### Playback Control
+Playback control (since [v1.4](https://github.com/iamoscarliang/particleview/releases/tag/1.4)) can be easily integrated with Android's [lifecycle](https://developer.android.com/jetpack/androidx/releases/lifecycle).
+
+XML
+```kotlin
+override fun onPause() {
+    super.onPause()     
+    particleView.pause()
+}
+
+override fun onResume() {     
+    super.onResume()
+    particleView.resume()
+}
+```
+
+Compose
+```kotlin
+var isPause by rememberSaveable { mutableStateOf(false) }
+
+LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+    isPause = true
+}
+LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+    isPause = false
+}
+
+ParticleView(
+    isPause = isPause
+    //...
+)
+```
+
+### Config Change Handling
+Config change handling has been introduced at [v1.4](https://github.com/iamoscarliang/particleview/releases/tag/1.4) (Currently Compose support only) to prevent stat loss when UI recreation.
+ParticleView use [kotlin-parcelize](https://developer.android.com/kotlin/parcelize#kts) to serialize data for state saving and restore.
+For large complex objects like bitmap, ParticleView use [Glide](https://github.com/bumptech/glide) to cache image resource.
 
 ## :tada: Samples
 [XML](https://github.com/iamoscarliang/particleview/tree/master/sample/xml/src/main)
