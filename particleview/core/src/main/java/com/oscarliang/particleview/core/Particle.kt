@@ -2,19 +2,23 @@ package com.oscarliang.particleview.core
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.os.Parcelable
+import com.oscarliang.particleview.core.model.FloatOffset
+import com.oscarliang.particleview.core.model.Image
+import com.oscarliang.particleview.core.model.IntOffset
 import com.oscarliang.particleview.core.util.nextFloatSafely
 import com.oscarliang.particleview.core.util.nextIntSafely
+import kotlinx.parcelize.Parcelize
 import java.lang.Math.toRadians
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
-class Particle(
-    val image: ParticleImage,
-    val startXMin: Float,
-    val startXMax: Float,
-    val startYMin: Float,
-    val startYMax: Float,
+@Parcelize
+data class Particle(
+    val image: Image,
+    val startX: FloatOffset,
+    val startY: FloatOffset,
     val speedMin: Float,
     val speedMax: Float,
     val accelXMin: Float,
@@ -30,41 +34,42 @@ class Particle(
     val duration: Long,
     val fadeOutDuration: Long,
     val density: Float,
-    val onParticleEnd: (Particle) -> Unit,
-    val paint: Paint = Paint()
-) {
+    val onParticleEnd: (Particle) -> Unit
+) : Parcelable {
 
-    val width: Float = image.size * density
-    val height: Float = image.size * image.ratio * density
-    private val scale: Float = width / image.bitmap.width
+    val width = image.size * density
 
-    var positionX: Float = 0.0f
-    var positionY: Float = 0.0f
-    var speedX: Float = 0.0f
-    var speedY: Float = 0.0f
-    var accelX: Float = 0.0f
-    var accelY: Float = 0.0f
-    var rotatation: Float = 0.0f
+    var positionX = 0.0f
+    var positionY = 0.0f
+    var speedX = 0.0f
+    var speedY = 0.0f
+    var accelX = 0.0f
+    var accelY = 0.0f
+    var rotatation = 0.0f
     var rotationSpeed = 0.0f
-    private var currentMillis = 0L
+    var alpha = 255
 
-    init {
-        reset()
-    }
+    private var currentTime = 0L
 
-    fun reset() {
+    fun reset(drawArea: IntOffset) {
         val speed = Random.nextFloatSafely(speedMin, speedMax)
         val angle = toRadians(Random.nextIntSafely(angleMin, angleMax).toDouble())
         speedX = speed * sin(angle).toFloat()
         speedY = speed * cos(angle).toFloat()
         accelX = Random.nextFloatSafely(accelXMin, accelXMax)
         accelY = Random.nextFloatSafely(accelYMin, accelYMax)
-        positionX = Random.nextFloatSafely(startXMin, startXMax) - width / 2
-        positionY = Random.nextFloatSafely(startYMin, startYMax) - height / 2
+        positionX = Random.nextFloatSafely(
+            startX.startValue * drawArea.startValue,
+            startX.endValue * drawArea.startValue
+        )
+        positionY = Random.nextFloatSafely(
+            startY.startValue * drawArea.endValue,
+            startY.endValue * drawArea.endValue
+        )
         rotatation = Random.nextIntSafely(rotationMin, rotationMax).toFloat()
         rotationSpeed = Random.nextFloatSafely(rotationSpeedMin, rotationSpeedMax)
-        paint.reset()
-        currentMillis = 0L
+        alpha = 255
+        currentTime = 0L
     }
 
     fun update(elapsedMillis: Long) {
@@ -73,34 +78,31 @@ class Particle(
         positionX += speedX / 1000 * elapsedMillis
         positionY += speedY / 1000 * elapsedMillis
         rotatation += rotationSpeed / 1000 * elapsedMillis
-        currentMillis += elapsedMillis
+        currentTime += elapsedMillis
 
         // Update alpha base on fade percentage
-        if (currentMillis >= duration) {
-            val fadePercent = (currentMillis - duration) * 1.0f / fadeOutDuration
-            paint.alpha = (255 * (1 - fadePercent)).toInt()
+        if (currentTime >= duration) {
+            val fadePercent = (currentTime - duration) * 1.0f / fadeOutDuration
+            alpha = (255 * (1 - fadePercent)).toInt()
         }
 
         // Remove and recycle the particle when reach total duration
-        if (currentMillis >= duration + fadeOutDuration) {
+        if (currentTime >= duration + fadeOutDuration) {
             onParticleEnd(this)
-            currentMillis = 0L
+            currentTime = 0L
         }
     }
 
-    fun draw(canvas: Canvas) {
+    fun draw(bitmapPool: BitmapPool, canvas: Canvas, paint: Paint) {
+        val bitmap = bitmapPool.get(image.imageId) ?: return
+        val height = width * (bitmap.height / bitmap.width)
+        val scale = width / bitmap.width
         canvas.save()
-        canvas.translate(positionX, positionY)
+        canvas.translate(positionX - width / 2, positionY - height / 2)
         canvas.rotate(rotatation, width / 2, height / 2)
         canvas.scale(scale, scale, width / 2, height / 2)
-        canvas.drawBitmap(image.bitmap, 0.0f, 0.0f, paint)
+        canvas.drawBitmap(bitmap, 0.0f, 0.0f, paint.apply { alpha = this@Particle.alpha })
         canvas.restore()
-    }
-
-    fun isInBound(x: Float, y: Float): Boolean {
-        // Check is (x, y) in particle bound
-        return x >= positionX && x <= positionX + width
-                && y >= positionY && y <= positionY + height
     }
 
 }

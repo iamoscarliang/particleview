@@ -1,22 +1,23 @@
 package com.oscarliang.particleview.compose
 
+import android.graphics.Paint
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import com.oscarliang.particleview.core.BitmapPool
 import com.oscarliang.particleview.core.DEFAULT_ACCEL_X
 import com.oscarliang.particleview.core.DEFAULT_ACCEL_Y
 import com.oscarliang.particleview.core.DEFAULT_ANGLE
@@ -29,13 +30,11 @@ import com.oscarliang.particleview.core.DEFAULT_ROTATION_SPEED
 import com.oscarliang.particleview.core.DEFAULT_SPEED
 import com.oscarliang.particleview.core.DEFAULT_START_X
 import com.oscarliang.particleview.core.DEFAULT_START_Y
-import com.oscarliang.particleview.core.Particle
-import com.oscarliang.particleview.core.ParticleImage
 import com.oscarliang.particleview.core.ParticleSystem
 import com.oscarliang.particleview.core.model.FloatOffset
 import com.oscarliang.particleview.core.model.Image
 import com.oscarliang.particleview.core.model.IntOffset
-import com.oscarliang.particleview.core.util.toBitmap
+import com.oscarliang.particleview.core.util.loadBitmap
 import kotlinx.coroutines.isActive
 
 /**
@@ -56,9 +55,9 @@ import kotlinx.coroutines.isActive
  * @param particleFadeOutDuration - the duration of the fade out effect of particle
  * @param particlePerSecond - the amount of particle being emitted per second
  * @param duration - the duration of the animation
- * @param isRunning - controls the current state of the animation
- * @param onParticleClick - callback being executed when any particle is clicked
- * @param onAnimationEnd - callback being executed when end of the animation
+ * @param isPause - pause or resume the animation
+ * @param isCancel - cancel the animation
+ * @param onParticlesEnd - callback being executed when end of animation or cancellation
  */
 @Composable
 fun ParticleView(
@@ -76,24 +75,32 @@ fun ParticleView(
     particleFadeOutDuration: Long = DEFAULT_PARTICLE_FADE_OUT_DURATION,
     particlePerSecond: Int = DEFAULT_PARTICLE_PER_SECOND,
     duration: Long = DEFAULT_DURATION,
-    isRunning: Boolean = true,
-    onParticleClick: (Particle) -> Unit = {},
-    onAnimationEnd: () -> Unit = {},
+    isPause: Boolean = false,
+    isCancel: Boolean = false,
+    onParticlesEnd: () -> Unit = {}
 ) {
 
-    val resources = LocalContext.current.resources
+    val context = LocalContext.current
     val density = LocalDensity.current.density
 
-    val particleSystem by remember {
+    val bitmapPool by remember { mutableStateOf(BitmapPool()) }
+    val paint by remember { mutableStateOf(Paint()) }
+    var isImageLoaded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        images.forEach {
+            bitmapPool.put(
+                image = loadBitmap(context, it.imageId),
+                id = it.imageId
+            )
+        }
+        isImageLoaded = true
+    }
+
+    val particleSystem by rememberSaveable {
         mutableStateOf(
             ParticleSystem(
-                images = images.map {
-                    ParticleImage(
-                        bitmap = resources.getDrawable(it.imageId, null).toBitmap(),
-                        size = it.size,
-                        tag = it.tag
-                    )
-                },
+                images = images,
                 startX = startX,
                 startY = startY,
                 angle = angle,
@@ -110,19 +117,20 @@ fun ParticleView(
             )
         )
     }
+    var lastFrameMillis by rememberSaveable { mutableLongStateOf(0L) }
+    var currentFrameMillis by rememberSaveable { mutableLongStateOf(0L) }
 
-    var lastFrameMillis by remember { mutableLongStateOf(0L) }
-    var currentFrameMillis by remember { mutableLongStateOf(0L) }
-
-    if (!isRunning) {
-        currentFrameMillis = duration
-    }
-
-    LaunchedEffect(Unit) {
+    LaunchedEffect(key1 = isCancel, key2 = isPause) {
         while (isActive) {
-            if (currentFrameMillis >= duration) {
+            if (isCancel || currentFrameMillis >= duration) {
                 particleSystem.release()
-                onAnimationEnd()
+                onParticlesEnd()
+                break
+            }
+            if (isPause) {
+                // Reset last frame time, so when resume the
+                // animation will start from where it pause.
+                lastFrameMillis = 0L
                 break
             }
             withFrameMillis { frameMillis ->
@@ -136,26 +144,30 @@ fun ParticleView(
 
     Canvas(
         modifier = modifier
-            .onGloballyPositioned { layoutCoordinates ->
-                particleSystem.width = layoutCoordinates.size.width
-                particleSystem.height = layoutCoordinates.size.height
-            }
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = { position ->
-                        val selected = particleSystem.getParticleAt(position.x, position.y)
-                        if (selected != null) {
-                            onParticleClick(selected)
-                        }
-                    }
-                )
+            .onGloballyPositioned { coordinates ->
+                particleSystem.drawArea = IntOffset(coordinates.size.width, coordinates.size.height)
             },
         onDraw = {
+            // Since the image is being loaded asynchronously,
+            // we redraw the canvas after loading complete.
+            // We make sure draw the canvas at least 1 time,
+            // so when pausing or config change the current
+            // state of the canvas will be remain.
+            if (!isImageLoaded) {
+                return@Canvas
+            }
+
+            // We trigger redraw when frame change
             currentFrameMillis.let {
                 drawIntoCanvas { canvas ->
-                    particleSystem.draw(canvas.nativeCanvas)
+                    particleSystem.draw(
+                        bitmapPool = bitmapPool,
+                        canvas = canvas.nativeCanvas,
+                        paint = paint
+                    )
                 }
             }
         }
     )
+
 }

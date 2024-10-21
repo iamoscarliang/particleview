@@ -1,92 +1,86 @@
 package com.oscarliang.xml
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
+import androidx.activity.ComponentActivity
 import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.oscarliang.particleview.core.model.FloatOffset
 import com.oscarliang.particleview.core.model.Image
 import com.oscarliang.particleview.core.model.IntOffset
 import com.oscarliang.particleview.xml.ParticleView
+import kotlinx.coroutines.launch
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
 
     private lateinit var particleView: ParticleView
-    private lateinit var btnSnow: Button
-    private lateinit var btnExplosion: Button
-    private lateinit var btnConfetti: Button
-    private lateinit var btnPoker: Button
-    private lateinit var btnRain: Button
-    private lateinit var btnBubble: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
+        particleView = findViewById(R.id.particle_view)
+
+        findViewById<Button>(R.id.btn_snow).setOnClickListener {
+            lifecycleScope.launch { playSnow() }
+            onAnimationStart()
+        }
+        findViewById<Button>(R.id.btn_explosion).setOnClickListener {
+            lifecycleScope.launch { playExplosion() }
+            onAnimationStart()
+        }
+        findViewById<Button>(R.id.btn_confetti).setOnClickListener {
+            lifecycleScope.launch { playConfetti() }
+            onAnimationStart()
+        }
+        findViewById<Button>(R.id.btn_poker).setOnClickListener {
+            lifecycleScope.launch { playPoker() }
+            onAnimationStart()
+        }
+        findViewById<Button>(R.id.btn_rain).setOnClickListener {
+            lifecycleScope.launch { playRain() }
+            onAnimationStart()
+        }
+        findViewById<Button>(R.id.btn_bubble).setOnClickListener {
+            lifecycleScope.launch { playBubble() }
+            onAnimationStart()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
         WindowCompat.getInsetsController(window, window.decorView).apply {
             hide(WindowInsetsCompat.Type.statusBars())
             hide(WindowInsetsCompat.Type.navigationBars())
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         }
-
-        particleView = findViewById(R.id.particle_view)
-        btnSnow = findViewById(R.id.btn_snow)
-        btnExplosion = findViewById(R.id.btn_explosion)
-        btnConfetti = findViewById(R.id.btn_confetti)
-        btnPoker = findViewById(R.id.btn_poker)
-        btnRain = findViewById(R.id.btn_rain)
-        btnBubble = findViewById(R.id.btn_bubble)
-
-        btnSnow.setOnClickListener {
-            playSnow()
-            hideButton()
-        }
-        btnExplosion.setOnClickListener {
-            playExplosion()
-            hideButton()
-        }
-        btnConfetti.setOnClickListener {
-            playConfetti()
-            hideButton()
-        }
-        btnPoker.setOnClickListener {
-            playPoker()
-            hideButton()
-        }
-        btnRain.setOnClickListener {
-            playRain()
-            hideButton()
-        }
-        btnBubble.setOnClickListener {
-            playBubble()
-            hideButton()
-        }
     }
 
-    private fun showButton() {
-        btnSnow.isVisible = true
-        btnExplosion.isVisible = true
-        btnConfetti.isVisible = true
-        btnPoker.isVisible = true
-        btnRain.isVisible = true
-        btnBubble.isVisible = true
+    override fun onPause() {
+        super.onPause()
+        particleView.pause()
     }
 
-    private fun hideButton() {
-        btnSnow.isVisible = false
-        btnExplosion.isVisible = false
-        btnConfetti.isVisible = false
-        btnPoker.isVisible = false
-        btnRain.isVisible = false
-        btnBubble.isVisible = false
+    override fun onResume() {
+        super.onResume()
+        particleView.resume()
     }
 
-    private fun playSnow() {
+    private fun onAnimationEnd() {
+        findViewById<View>(R.id.layout_button).isVisible = true
+    }
+
+    private fun onAnimationStart() {
+        findViewById<View>(R.id.layout_button).isVisible = false
+    }
+
+    private suspend fun playSnow() {
         particleView.start(
             images = listOf(
                 Image(
@@ -105,11 +99,11 @@ class MainActivity : AppCompatActivity() {
             accelY = FloatOffset(300.0f, 600.0f),
             particlePerSecond = 25,
             duration = 6000,
-            onAnimationEnd = { showButton() }
+            onParticlesEnd = { onAnimationEnd() }
         )
     }
 
-    private fun playExplosion() {
+    private suspend fun playExplosion() {
         particleView.start(
             images = listOf(
                 Image(
@@ -161,11 +155,11 @@ class MainActivity : AppCompatActivity() {
             particleDuration = 1200,
             particlePerSecond = 50,
             duration = 5000,
-            onAnimationEnd = { showButton() }
+            onParticlesEnd = { onAnimationEnd() }
         )
     }
 
-    private fun playConfetti() {
+    private suspend fun playConfetti() {
         particleView.start(
             images = listOf(
                 Image(
@@ -196,11 +190,11 @@ class MainActivity : AppCompatActivity() {
             particleFadeOutDuration = 300,
             particlePerSecond = 20,
             duration = 6000,
-            onAnimationEnd = { showButton() }
+            onParticlesEnd = { onAnimationEnd() }
         )
     }
 
-    private fun playPoker() {
+    private suspend fun playPoker() {
         particleView.start(
             images = listOf(
                 Image(
@@ -229,11 +223,11 @@ class MainActivity : AppCompatActivity() {
             particleDuration = 1000,
             particlePerSecond = 10,
             duration = 5000,
-            onAnimationEnd = { showButton() }
+            onParticlesEnd = { onAnimationEnd() }
         )
     }
 
-    private fun playRain() {
+    private suspend fun playRain() {
         particleView.start(
             images = listOf(
                 Image(
@@ -258,11 +252,11 @@ class MainActivity : AppCompatActivity() {
             particleFadeOutDuration = 300,
             particlePerSecond = 60,
             duration = 5000,
-            onAnimationEnd = { showButton() }
+            onParticlesEnd = { onAnimationEnd() }
         )
     }
 
-    private fun playBubble() {
+    private suspend fun playBubble() {
         particleView.start(
             images = listOf(
                 Image(
@@ -283,7 +277,7 @@ class MainActivity : AppCompatActivity() {
             particleDuration = 1600,
             particlePerSecond = 20,
             duration = 8000,
-            onAnimationEnd = { showButton() }
+            onParticlesEnd = { onAnimationEnd() }
         )
     }
 

@@ -6,20 +6,21 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +28,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.oscarliang.compose.ui.theme.ParticleViewTheme
 import com.oscarliang.particleview.compose.ParticleView
 import com.oscarliang.particleview.core.model.FloatOffset
@@ -34,41 +40,65 @@ import com.oscarliang.particleview.core.model.Image
 import com.oscarliang.particleview.core.model.IntOffset
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             ParticleViewTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    ParticleScreen()
-                }
+                ParticleScreen()
             }
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            hide(WindowInsetsCompat.Type.statusBars())
+            hide(WindowInsetsCompat.Type.navigationBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+    }
+
 }
 
 @Composable
 fun ParticleScreen() {
 
-    var type by remember { mutableStateOf(ParticleType.NONE) }
+    var type by rememberSaveable { mutableStateOf(ParticleType.NONE) }
+    var isPause by rememberSaveable { mutableStateOf(false) }
 
-    Column(modifier = Modifier.background(Color.Black)) {
-        Box(modifier = Modifier.weight(1.0f)) {
+    // Pause and resume when lifecycle change
+    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+        isPause = true
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        isPause = false
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1.0f)
+        ) {
             when (type) {
-                ParticleType.SNOW -> SnowView { type = ParticleType.NONE }
-                ParticleType.EXPLOSION -> ExplosionView { type = ParticleType.NONE }
-                ParticleType.CONFETTI -> ConfettiView { type = ParticleType.NONE }
-                ParticleType.POKER -> PokerView { type = ParticleType.NONE }
-                ParticleType.RAIN -> RainView { type = ParticleType.NONE }
-                ParticleType.BUBBLE -> BubbleView { type = ParticleType.NONE }
-                else -> {}
+                ParticleType.SNOW -> SnowView(isPause) { type = ParticleType.NONE }
+                ParticleType.EXPLOSION -> ExplosionView(isPause) { type = ParticleType.NONE }
+                ParticleType.CONFETTI -> ConfettiView(isPause) { type = ParticleType.NONE }
+                ParticleType.POKER -> PokerView(isPause) { type = ParticleType.NONE }
+                ParticleType.RAIN -> RainView(isPause) { type = ParticleType.NONE }
+                ParticleType.BUBBLE -> BubbleView(isPause) { type = ParticleType.NONE }
+                else -> Unit
             }
         }
+
         if (type == ParticleType.NONE) {
-            ButtonSection(
+            AnimationButtons(
                 onSnowClick = { type = ParticleType.SNOW },
                 onExplosionClick = { type = ParticleType.EXPLOSION },
                 onConfettiClick = { type = ParticleType.CONFETTI },
@@ -82,7 +112,8 @@ fun ParticleScreen() {
 
 @Composable
 fun SnowView(
-    onAnimationEnd: () -> Unit
+    isPause: Boolean,
+    onParticlesEnd: () -> Unit
 ) {
     ParticleView(
         modifier = Modifier.fillMaxSize(),
@@ -103,16 +134,20 @@ fun SnowView(
         accelY = FloatOffset(300.0f, 600.0f),
         particlePerSecond = 25,
         duration = 6000,
-        onAnimationEnd = onAnimationEnd
+        isPause = isPause,
+        onParticlesEnd = { onParticlesEnd() }
     )
 }
 
 @Composable
-fun ExplosionView(
-    onAnimationEnd: () -> Unit
+fun BoxScope.ExplosionView(
+    isPause: Boolean,
+    onParticlesEnd: () -> Unit
 ) {
     ParticleView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .aspectRatio(1.0f)
+            .align(Alignment.Center),
         images = listOf(
             Image(
                 imageId = R.drawable.particle_blue,
@@ -163,16 +198,20 @@ fun ExplosionView(
         particleDuration = 1200,
         particlePerSecond = 50,
         duration = 5000,
-        onAnimationEnd = onAnimationEnd
+        isPause = isPause,
+        onParticlesEnd = { onParticlesEnd() }
     )
 }
 
 @Composable
-fun ConfettiView(
-    onAnimationEnd: () -> Unit
+fun BoxScope.ConfettiView(
+    isPause: Boolean,
+    onParticlesEnd: () -> Unit
 ) {
     ParticleView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .aspectRatio(1.0f)
+            .align(Alignment.CenterStart),
         images = listOf(
             Image(
                 imageId = R.drawable.confetti_blue,
@@ -202,16 +241,20 @@ fun ConfettiView(
         particleFadeOutDuration = 300,
         particlePerSecond = 20,
         duration = 6000,
-        onAnimationEnd = onAnimationEnd
+        isPause = isPause,
+        onParticlesEnd = { onParticlesEnd() }
     )
 }
 
 @Composable
-fun PokerView(
-    onAnimationEnd: () -> Unit
+fun BoxScope.PokerView(
+    isPause: Boolean,
+    onParticlesEnd: () -> Unit
 ) {
     ParticleView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .aspectRatio(1.0f)
+            .align(Alignment.Center),
         images = listOf(
             Image(
                 imageId = R.drawable.poker_spade,
@@ -239,13 +282,15 @@ fun PokerView(
         particleDuration = 1000,
         particlePerSecond = 10,
         duration = 5000,
-        onAnimationEnd = onAnimationEnd
+        isPause = isPause,
+        onParticlesEnd = { onParticlesEnd() }
     )
 }
 
 @Composable
 fun RainView(
-    onAnimationEnd: () -> Unit
+    isPause: Boolean,
+    onParticlesEnd: () -> Unit
 ) {
     ParticleView(
         modifier = Modifier.fillMaxSize(),
@@ -272,15 +317,15 @@ fun RainView(
         particleFadeOutDuration = 300,
         particlePerSecond = 60,
         duration = 5000,
-        onAnimationEnd = {
-            onAnimationEnd()
-        }
+        isPause = isPause,
+        onParticlesEnd = { onParticlesEnd() }
     )
 }
 
 @Composable
 fun BubbleView(
-    onAnimationEnd: () -> Unit
+    isPause: Boolean,
+    onParticlesEnd: () -> Unit
 ) {
     ParticleView(
         modifier = Modifier.fillMaxSize(),
@@ -303,14 +348,13 @@ fun BubbleView(
         particleDuration = 1600,
         particlePerSecond = 20,
         duration = 8000,
-        onAnimationEnd = {
-            onAnimationEnd()
-        }
+        isPause = isPause,
+        onParticlesEnd = { onParticlesEnd() }
     )
 }
 
 @Composable
-fun ButtonSection(
+fun AnimationButtons(
     onSnowClick: () -> Unit,
     onExplosionClick: () -> Unit,
     onConfettiClick: () -> Unit,
@@ -321,7 +365,9 @@ fun ButtonSection(
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
         ) {
             Button(
                 onClick = { onSnowClick() },
@@ -346,7 +392,9 @@ fun ButtonSection(
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
         ) {
             Button(
                 onClick = { onPokerClick() },
@@ -376,12 +424,7 @@ fun ButtonSection(
 @Composable
 private fun ParticleScreenPreview() {
     ParticleViewTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
-        ) {
-            ParticleScreen()
-        }
+        ParticleScreen()
     }
 }
 

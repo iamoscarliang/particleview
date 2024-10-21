@@ -1,12 +1,17 @@
 package com.oscarliang.particleview.core
 
 import android.graphics.Canvas
+import android.graphics.Paint
+import android.os.Parcelable
 import com.oscarliang.particleview.core.model.FloatOffset
+import com.oscarliang.particleview.core.model.Image
 import com.oscarliang.particleview.core.model.IntOffset
+import kotlinx.parcelize.Parcelize
 import kotlin.random.Random
 
+@Parcelize
 class ParticleSystem(
-    val images: List<ParticleImage>,
+    val images: List<Image>,
     val startX: FloatOffset,
     val startY: FloatOffset,
     val speed: FloatOffset,
@@ -20,25 +25,24 @@ class ParticleSystem(
     val particlePerSecond: Int,
     val duration: Long,
     val density: Float
-) {
+) : Parcelable {
 
-    var width: Int = 0
-    var height: Int = 0
+    var drawArea = IntOffset(0, 0)
 
     private val particles = mutableListOf<Particle>()
     private val particlesPool = mutableListOf<Particle>()
     private val particlesToRemove = mutableListOf<Particle>()
 
-    private var current = 0L
+    private var currentTime = 0L
 
     fun update(currentMillis: Long, elapsedMillis: Long) {
         val durationPerParticle = particleDuration + particleFadeOutDuration
         if (currentMillis < duration - durationPerParticle) {
-            val millisPerParticle = 1000 / particlePerSecond
-            current += elapsedMillis
-            if (current >= millisPerParticle) {
-                particles.add(getOneParticle())
-                current = 0
+            val millisPerParticle = 1000L / particlePerSecond
+            currentTime += elapsedMillis
+            if (currentTime >= millisPerParticle) {
+                particles.add(getOneParticle().apply { reset(drawArea) })
+                currentTime = 0L
             }
         }
 
@@ -54,9 +58,13 @@ class ParticleSystem(
         particlesToRemove.clear()
     }
 
-    fun draw(canvas: Canvas) {
+    fun draw(bitmapPool: BitmapPool, canvas: Canvas, paint: Paint) {
         particles.forEach { particle ->
-            particle.draw(canvas)
+            particle.draw(
+                bitmapPool = bitmapPool,
+                canvas = canvas,
+                paint = paint
+            )
         }
     }
 
@@ -66,27 +74,14 @@ class ParticleSystem(
         particlesToRemove.clear()
     }
 
-    fun getParticleAt(x: Float, y: Float): Particle? {
-        particles.forEach { particle ->
-            if (particle.isInBound(x, y)) {
-                return particle
-            }
-        }
-        return null
-    }
-
     private fun getOneParticle() =
         if (particlesPool.isNotEmpty()) {
-            val particle = particlesPool.removeAt(0)
-            particle.reset()
-            particle
+            particlesPool.removeAt(0)
         } else {
             Particle(
                 image = images[Random.nextInt(images.size)],
-                startXMin = startX.startValue * width,
-                startXMax = startX.endValue * width,
-                startYMin = startY.startValue * height,
-                startYMax = startY.endValue * height,
+                startX = startX,
+                startY = startY,
                 speedMin = speed.startValue,
                 speedMax = speed.endValue,
                 accelXMin = accelX.startValue,

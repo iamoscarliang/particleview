@@ -33,5 +33,4 @@ publishing {
 
 dependencies {
     api(project(":particleview:core"))
-    implementation("androidx.core:core-ktx:1.13.1")
 }

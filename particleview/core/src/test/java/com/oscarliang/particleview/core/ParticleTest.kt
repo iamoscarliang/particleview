@@ -1,14 +1,9 @@
 package com.oscarliang.particleview.core
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import com.oscarliang.particleview.core.model.FloatOffset
+import com.oscarliang.particleview.core.model.Image
+import com.oscarliang.particleview.core.model.IntOffset
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,23 +15,14 @@ class ParticleTest {
     private val size = 100
     private val density = 1.0f
 
-    private lateinit var bitmap: Bitmap
-    private lateinit var paint: Paint
     private lateinit var particle: Particle
 
     @Before
     fun setUp() {
-        bitmap = mockk<Bitmap>(relaxed = true).apply {
-            every { width } returns size
-            every { height } returns size
-        }
-        paint = mockk<Paint>(relaxed = true)
         particle = Particle(
-            image = ParticleImage(bitmap, size),
-            startXMin = 0.0f,
-            startXMax = 0.0f,
-            startYMin = 0.0f,
-            startYMax = 0.0f,
+            image = Image(0, size),
+            startX = FloatOffset(0.0f),
+            startY = FloatOffset(0.0f),
             speedMin = 100.0f,
             speedMax = 100.0f,
             accelXMin = 10.0f,
@@ -52,15 +38,13 @@ class ParticleTest {
             duration = 500,
             fadeOutDuration = 200,
             density = density,
-            onParticleEnd = {},
-            paint = paint
-        )
+            onParticleEnd = {}
+        ).apply { reset(IntOffset(0)) }
     }
 
     @Test
     fun testSize() {
         assertEquals(particle.width, size * density)
-        assertEquals(particle.height, size * density)
     }
 
     @Test
@@ -89,24 +73,24 @@ class ParticleTest {
     @Test
     fun testPosition() {
         // Start position is (x = 0, y = 0)
-        assertEquals(particle.positionX, 0.0f - particle.width / 2)
-        assertEquals(particle.positionY, 0.0f - particle.height / 2)
+        assertEquals(particle.positionX, 0.0f)
+        assertEquals(particle.positionY, 0.0f)
 
         // Speed is (speedX = 1, speedY = 101)
         // X translation is 1 / 1000 / 100ms = 0.1
         // Y translation is 101 / 1000 / 100ms = 10.1
         // End position will produce (x = 0.1, y = 10.1)
         particle.update(100)
-        assertEquals(particle.positionX, 0.1f - particle.width / 2)
-        assertEquals(particle.positionY, 10.1f - particle.height / 2)
+        assertEquals(particle.positionX, 0.1f)
+        assertEquals(particle.positionY, 10.1f)
 
         // Speed is (speedX = 2, speedY = 102)
         // X translation is 2 / 1000 / 100ms = 0.2
         // Y translation is 102 / 1000 / 100ms = 10.2
         // End position will produce (x = 0.3, y = 20.3)
         particle.update(100)
-        assertEquals(particle.positionX, 0.3f - particle.width / 2)
-        assertEquals(particle.positionY, 20.3f - particle.height / 2)
+        assertEquals(particle.positionX, 0.3f)
+        assertEquals(particle.positionY, 20.3f)
     }
 
     @Test
@@ -117,6 +101,7 @@ class ParticleTest {
         // Rotation speed is 30 / 1000 * 100ms = 3
         particle.update(100)
         assertEquals(particle.rotatation, 33.0f)
+
         particle.update(100)
         assertEquals(particle.rotatation, 36.0f)
     }
@@ -124,37 +109,17 @@ class ParticleTest {
 
     @Test
     fun testFadeOut() {
+        // Fast forward to start of fadeout, alpha = 255
         particle.update(500)
-        verify { paint.alpha = 255 }
+        assertEquals(particle.alpha, 255)
 
+        // Alpha is 255 * (1 - 0.5) = 127
         particle.update(100)
-        verify { paint.alpha = 127 }
+        assertEquals(particle.alpha, 127)
 
+        // Alpha is 255 * (1 - 1) = 0
         particle.update(100)
-        verify { paint.alpha = 0 }
-    }
-
-    @Test
-    fun testDraw() {
-        val canvas = mockk<Canvas>(relaxed = true)
-        particle.update(100)
-        particle.draw(canvas)
-
-        verify { canvas.save() }
-        verify { canvas.translate(0.1f - particle.width / 2, 10.1f - particle.height / 2) }
-        verify { canvas.rotate(33.0f, particle.width / 2, particle.height / 2) }
-        verify { canvas.scale(density, density, particle.width / 2, particle.height / 2) }
-        verify { canvas.drawBitmap(bitmap, 0.0f, 0.0f, paint) }
-        verify { canvas.restore() }
-    }
-
-    @Test
-    fun testIsInBound() {
-        particle.update(100)
-
-        // Bound at (Left = -49.9, Top = -39.9, Right = 50.1, Bottom = 60.1)
-        assertTrue(particle.isInBound(0.0f, 0.0f))
-        assertFalse(particle.isInBound(60.0f, 60.0f))
+        assertEquals(particle.alpha, 0)
     }
 
 }

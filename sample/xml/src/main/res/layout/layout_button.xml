@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button
+        android:id="@+id/btn_snow"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/snow"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@id/btn_poker"
+        app:layout_constraintEnd_toStartOf="@id/btn_explosion"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_explosion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="@string/explosion"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@id/btn_rain"
+        app:layout_constraintEnd_toStartOf="@id/btn_confetti"
+        app:layout_constraintStart_toEndOf="@+id/btn_snow" />
+
+    <Button
+        android:id="@+id/btn_confetti"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/confetti"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@id/btn_bubble"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_explosion" />
+
+    <Button
+        android:id="@+id/btn_poker"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/poker"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_rain"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btn_rain"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="@string/rain"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btn_bubble"
+        app:layout_constraintStart_toEndOf="@+id/btn_poker" />
+
+    <Button
+        android:id="@+id/btn_bubble"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:text="@string/bubble"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_rain" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

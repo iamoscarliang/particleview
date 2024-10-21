@@ -1,15 +1,17 @@
 package com.oscarliang.particleview.xml
 
+import android.animation.Animator
+import android.animation.Animator.AnimatorListener
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.util.AttributeSet
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.animation.LinearInterpolator
-import androidx.core.animation.addListener
+import com.oscarliang.particleview.core.BitmapPool
 import com.oscarliang.particleview.core.DEFAULT_ACCEL_X
 import com.oscarliang.particleview.core.DEFAULT_ACCEL_Y
 import com.oscarliang.particleview.core.DEFAULT_ANGLE
@@ -22,13 +24,11 @@ import com.oscarliang.particleview.core.DEFAULT_ROTATION_SPEED
 import com.oscarliang.particleview.core.DEFAULT_SPEED
 import com.oscarliang.particleview.core.DEFAULT_START_X
 import com.oscarliang.particleview.core.DEFAULT_START_Y
-import com.oscarliang.particleview.core.Particle
-import com.oscarliang.particleview.core.ParticleImage
 import com.oscarliang.particleview.core.ParticleSystem
 import com.oscarliang.particleview.core.model.FloatOffset
 import com.oscarliang.particleview.core.model.Image
 import com.oscarliang.particleview.core.model.IntOffset
-import com.oscarliang.particleview.core.util.toBitmap
+import com.oscarliang.particleview.core.util.loadBitmap
 
 class ParticleView : View {
 
@@ -38,8 +38,10 @@ class ParticleView : View {
 
     private var particleSystem: ParticleSystem? = null
     private var animator: ValueAnimator? = null
-    private var duration: Long = 0L
     private var currentMillis = 0L
+
+    private val bitmapPool = BitmapPool()
+    private val paint = Paint()
 
     /**
      *  Create and start the animation. Cancel the previous
@@ -59,11 +61,10 @@ class ParticleView : View {
      * @param particleFadeOutDuration - the duration of the fade out effect of particle
      * @param particlePerSecond - the amount of particle being emitted per second
      * @param duration - the duration of the animation
-     * @param onParticleClick - callback being executed when any particle is clicked
-     * @param onAnimationEnd - callback being executed when end of the animation
+     * @param onParticlesEnd - callback being executed when end of animation or cancellation
      */
     @SuppressLint("ClickableViewAccessibility", "UseCompatLoadingForDrawables")
-    fun start(
+    suspend fun start(
         images: List<Image>,
         startX: FloatOffset = DEFAULT_START_X,
         startY: FloatOffset = DEFAULT_START_Y,
@@ -77,20 +78,11 @@ class ParticleView : View {
         particleFadeOutDuration: Long = DEFAULT_PARTICLE_FADE_OUT_DURATION,
         particlePerSecond: Int = DEFAULT_PARTICLE_PER_SECOND,
         duration: Long = DEFAULT_DURATION,
-        onParticleClick: (Particle) -> Unit = {},
-        onAnimationEnd: () -> Unit = {},
+        onParticlesEnd: () -> Unit = {}
     ) {
-        this.duration = duration
-        this.currentMillis = 0
 
-        val particleSystem = ParticleSystem(
-            images = images.map {
-                ParticleImage(
-                    bitmap = resources.getDrawable(it.imageId, null).toBitmap(),
-                    size = it.size,
-                    tag = it.tag
-                )
-            },
+        particleSystem = ParticleSystem(
+            images = images,
             startX = startX,
             startY = startY,
             angle = angle,
@@ -105,60 +97,88 @@ class ParticleView : View {
             duration = duration,
             density = resources.displayMetrics.density
         )
-        this.particleSystem = particleSystem
 
-        animator?.cancel()
-        val animator = ValueAnimator.ofInt(0, duration.toInt())
+        animator = ValueAnimator.ofInt(0, duration.toInt())
             .apply {
                 this.duration = duration
                 this.interpolator = LinearInterpolator()
-                addListener(onEnd = {
-                    particleSystem.release()
-                    this@ParticleView.particleSystem = null
-                    onAnimationEnd()
+                this.currentPlayTime = currentMillis
+                addListener(object : AnimatorListener {
+                    override fun onAnimationStart(p0: Animator) {
+                    }
+
+                    override fun onAnimationEnd(p0: Animator) {
+                        onParticlesEnd()
+                        release()
+                        invalidate()
+                    }
+
+                    override fun onAnimationCancel(p0: Animator) {
+                        onParticlesEnd()
+                        release()
+                        invalidate()
+                    }
+
+                    override fun onAnimationRepeat(p0: Animator) {
+                    }
                 })
                 addUpdateListener { animation ->
                     val totalMillis = animation.animatedValue as Int
                     val elapsedMillis = totalMillis - currentMillis
                     currentMillis = totalMillis.toLong()
-                    particleSystem.update(currentMillis, elapsedMillis)
+                    particleSystem?.update(currentMillis, elapsedMillis)
                     postInvalidate()
                 }
+                start()
             }
-        animator.start()
-        this.animator = animator
 
         // Register the layout listener to get the real width and height
         viewTreeObserver.addOnGlobalLayoutListener(object :
             ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 viewTreeObserver.removeOnGlobalLayoutListener(this)
-                particleSystem.width = width
-                particleSystem.height = height
+                particleSystem?.drawArea = IntOffset(width, height)
             }
         })
 
-        // Add touch listener to get particle click callback
-        setOnTouchListener { _, event ->
-            val action = event.actionMasked
-            if (action == MotionEvent.ACTION_DOWN) {
-                val selected = particleSystem.getParticleAt(event.x, event.y)
-                if (selected != null) {
-                    onParticleClick(selected)
-                }
-            }
-            true
+        images.forEach {
+            bitmapPool.put(
+                image = loadBitmap(context, it.imageId),
+                id = it.imageId
+            )
         }
     }
 
+    fun pause() {
+        animator?.pause()
+    }
+
+    fun resume() {
+        animator?.resume()
+    }
+
     fun cancel() {
-        currentMillis = duration
-        animator?.currentPlayTime = duration
+        animator?.cancel()
+    }
+
+    fun isPause() = animator?.isPaused ?: false
+
+    fun isRunning() = animator?.isRunning ?: false
+
+    private fun release() {
+        particleSystem?.release()
+        particleSystem = null
+        animator = null
+        currentMillis = 0L
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        particleSystem?.draw(canvas)
+        particleSystem?.draw(
+            bitmapPool = bitmapPool,
+            canvas = canvas,
+            paint = paint
+        )
     }
 
 }

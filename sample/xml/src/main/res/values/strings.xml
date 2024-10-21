@@ -6,4 +6,7 @@
     <string name="poker">Poker</string>
     <string name="rain">Rain</string>
     <string name="bubble">Bubble</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="cancel">Cancel</string>
 </resources>
