@@ -138,9 +138,11 @@ ParticleView(
 ```
 
 ### Config Change Handling
-Config change handling has been introduced at [v1.4](https://github.com/iamoscarliang/particleview/releases/tag/1.4) (Currently Compose support only) to prevent stat loss when UI recreation.
-ParticleView use [kotlin-parcelize](https://developer.android.com/kotlin/parcelize#kts) to serialize data for state saving and restore.
+Config change handling has been introduced at [v1.4](https://github.com/iamoscarliang/particleview/releases/tag/1.4) (Currently Compose support only) to prevent state loss when UI recreation.
+ParticleView use [kotlin-parcelize](https://developer.android.com/kotlin/parcelize#kts) to serialize data for state saving and restoring.
 For large complex objects like bitmap, ParticleView use [Glide](https://github.com/bumptech/glide) to cache image resource.
+
+<img src="https://github.com/iamoscarliang/particleview/blob/master/images/config_change_mechanism.gif" width="600">
 
 ## :tada: Samples
 [XML](https://github.com/iamoscarliang/particleview/tree/master/sample/xml/src/main)
