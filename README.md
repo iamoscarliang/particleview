@@ -145,15 +145,14 @@ For large complex objects like bitmap, ParticleView use [Glide](https://github.c
 <img src="https://github.com/iamoscarliang/particleview/blob/master/images/config_change_mechanism.gif" width="600">
 
 ## :tada: Samples
-[XML](https://github.com/iamoscarliang/particleview/tree/master/sample/xml/src/main)
-
-[Compose](https://github.com/iamoscarliang/particleview/tree/master/sample/compose/src/main)
+- [XML](https://github.com/iamoscarliang/particleview/tree/master/sample/xml/src/main)
+- [Compose](https://github.com/iamoscarliang/particleview/tree/master/sample/compose/src/main)
 
 ## :balance_scale: Dependencies
-[org.jetbrains.kotlin.android](https://plugins.gradle.org/plugin/org.jetbrains.kotlin.android)
-[org.jetbrains.kotlin.plugin.parcelize](https://plugins.gradle.org/plugin/org.jetbrains.kotlin.plugin.parcelize)
-[androidx.compose.ui:ui](https://developer.android.com/jetpack/androidx/releases/compose-ui)
-[androidx.compose.foundation:foundation](https://developer.android.com/jetpack/androidx/releases/compose-foundation)
-[com.github.bumptech.glide:glide](https://github.com/bumptech/glide)
-[junit:junit](https://github.com/junit-team/junit4)
-[io.mockk:mockk](https://github.com/mockk/mockk)
+- [org.jetbrains.kotlin.android](https://plugins.gradle.org/plugin/org.jetbrains.kotlin.android)
+- [org.jetbrains.kotlin.plugin.parcelize](https://plugins.gradle.org/plugin/org.jetbrains.kotlin.plugin.parcelize)
+- [androidx.compose.ui:ui](https://developer.android.com/jetpack/androidx/releases/compose-ui)
+- [androidx.compose.foundation:foundation](https://developer.android.com/jetpack/androidx/releases/compose-foundation)
+- [com.github.bumptech.glide:glide](https://github.com/bumptech/glide)
+- [junit:junit](https://github.com/junit-team/junit4)
+- [io.mockk:mockk](https://github.com/mockk/mockk)
