@@ -1,7 +1,7 @@
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
-    id("kotlin-parcelize")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.parcelize)
     id("maven-publish")
 }
 
@@ -33,7 +33,7 @@ publishing {
 }
 
 dependencies {
-    implementation("com.github.bumptech.glide:glide:4.16.0")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("io.mockk:mockk:1.12.4")
+    implementation(libs.glide)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
 }
