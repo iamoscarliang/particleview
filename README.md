@@ -6,7 +6,7 @@
 ![minSdk](https://img.shields.io/badge/minSdk-26-brightgreen)
 [![license](https://img.shields.io/badge/license-MIT-brightgreen)](https://github.com/iamoscarliang/particleview/blob/master/LICENSE)
 
-[Getting Started](#wrench-getting-started) • [How To Use](#computer-how-to-use) • [Features](#pushpin-features) • [Samples](#tada-samples) • [License](#balance_scale-license)
+[Getting Started](#wrench-getting-started) • [How To Use](#computer-how-to-use) • [Features](#pushpin-features) • [Samples](#tada-samples) • [Dependencies](#balance_scale-dependencies)
 
 **A lightweight particle effect for Android**
 </div>
@@ -149,5 +149,11 @@ For large complex objects like bitmap, ParticleView use [Glide](https://github.c
 
 [Compose](https://github.com/iamoscarliang/particleview/tree/master/sample/compose/src/main)
 
-## :balance_scale: License
-ParticleView is licensed under the [MIT license](https://github.com/iamoscarliang/particleview/blob/master/LICENSE)
+## :balance_scale: Dependencies
+[org.jetbrains.kotlin.android](https://plugins.gradle.org/plugin/org.jetbrains.kotlin.android)
+[org.jetbrains.kotlin.plugin.parcelize](https://plugins.gradle.org/plugin/org.jetbrains.kotlin.plugin.parcelize)
+[androidx.compose.ui:ui](https://developer.android.com/jetpack/androidx/releases/compose-ui)
+[androidx.compose.foundation:foundation](https://developer.android.com/jetpack/androidx/releases/compose-foundation)
+[com.github.bumptech.glide:glide](https://github.com/bumptech/glide)
+[junit:junit](https://github.com/junit-team/junit4)
+[io.mockk:mockk](https://github.com/mockk/mockk)
