@@ -73,6 +73,11 @@ class MainActivity : ComponentActivity() {
         particleView.resume()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        particleView.cancel()
+    }
+
     private fun onAnimationEnd() {
         findViewById<View>(R.id.layout_button).isVisible = true
     }
