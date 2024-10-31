@@ -6,8 +6,8 @@ class BitmapPool {
 
     private val bitmaps = mutableMapOf<Int, Bitmap>()
 
-    fun put(image: Bitmap, id: Int) {
-        bitmaps[id] = image
+    fun put(bitmap: Bitmap, id: Int) {
+        bitmaps[id] = bitmap
     }
 
     fun get(id: Int): Bitmap? = bitmaps[id]

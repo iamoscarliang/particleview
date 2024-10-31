@@ -37,14 +37,8 @@ class ParticleTest {
             rotationSpeedMax = 30.0f,
             duration = 500,
             fadeOutDuration = 200,
-            density = density,
             onParticleEnd = {}
         ).apply { reset(IntOffset(0)) }
-    }
-
-    @Test
-    fun testSize() {
-        assertEquals(particle.width, size * density)
     }
 
     @Test

@@ -21,3 +21,5 @@ suspend fun loadBitmap(context: Context, id: Int): Bitmap = suspendCoroutine {
         }
     )
 }
+
+fun Bitmap.aspectRatio() = height / width

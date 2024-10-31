@@ -3,28 +3,18 @@ package com.oscarliang.particleview.core
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.os.Parcelable
-import com.oscarliang.particleview.core.model.FloatOffset
-import com.oscarliang.particleview.core.model.Image
 import com.oscarliang.particleview.core.model.IntOffset
 import kotlinx.parcelize.Parcelize
 import kotlin.random.Random
 
+/**
+ *  Parent class to initialize and update the particles
+ *
+ * @param config - the configuration to be applied to the particle
+ */
 @Parcelize
 class ParticleSystem(
-    val images: List<Image>,
-    val startX: FloatOffset,
-    val startY: FloatOffset,
-    val speed: FloatOffset,
-    val accelX: FloatOffset,
-    val accelY: FloatOffset,
-    val angle: IntOffset,
-    val rotation: IntOffset,
-    val rotationSpeed: FloatOffset,
-    val particleDuration: Long,
-    val particleFadeOutDuration: Long,
-    val particlePerSecond: Int,
-    val duration: Long,
-    val density: Float
+    val config: ParticleConfig
 ) : Parcelable {
 
     var drawArea = IntOffset(0, 0)
@@ -35,10 +25,14 @@ class ParticleSystem(
 
     private var currentTime = 0L
 
-    fun update(currentMillis: Long, elapsedMillis: Long) {
-        val durationPerParticle = particleDuration + particleFadeOutDuration
+    fun update(
+        currentMillis: Long,
+        elapsedMillis: Long,
+        duration: Long
+    ) {
+        val durationPerParticle = config.particleDuration + config.particleFadeOutDuration
         if (currentMillis < duration - durationPerParticle) {
-            val millisPerParticle = 1000L / particlePerSecond
+            val millisPerParticle = 1000L / config.particlePerSecond
             currentTime += elapsedMillis
             if (currentTime >= millisPerParticle) {
                 particles.add(getOneParticle().apply { reset(drawArea) })
@@ -58,12 +52,18 @@ class ParticleSystem(
         particlesToRemove.clear()
     }
 
-    fun draw(bitmapPool: BitmapPool, canvas: Canvas, paint: Paint) {
+    fun draw(
+        bitmapPool: BitmapPool,
+        canvas: Canvas,
+        paint: Paint,
+        density: Float
+    ) {
         particles.forEach { particle ->
             particle.draw(
                 bitmapPool = bitmapPool,
                 canvas = canvas,
-                paint = paint
+                paint = paint,
+                density = density
             )
         }
     }
@@ -79,25 +79,24 @@ class ParticleSystem(
             particlesPool.removeAt(0)
         } else {
             Particle(
-                image = images[Random.nextInt(images.size)],
-                startX = startX,
-                startY = startY,
-                speedMin = speed.startValue,
-                speedMax = speed.endValue,
-                accelXMin = accelX.startValue,
-                accelXMax = accelX.endValue,
-                accelYMin = accelY.startValue,
-                accelYMax = accelY.endValue,
-                angleMin = angle.startValue,
-                angleMax = angle.endValue,
-                rotationMin = rotation.startValue,
-                rotationMax = rotation.endValue,
-                rotationSpeedMin = rotationSpeed.startValue,
-                rotationSpeedMax = rotationSpeed.endValue,
-                duration = particleDuration,
-                fadeOutDuration = particleFadeOutDuration,
-                onParticleEnd = { particlesToRemove.add(it) },
-                density = density
+                image = config.images[Random.nextInt(config.images.size)],
+                startX = config.startX,
+                startY = config.startY,
+                speedMin = config.speed.startValue,
+                speedMax = config.speed.endValue,
+                accelXMin = config.accelX.startValue,
+                accelXMax = config.accelX.endValue,
+                accelYMin = config.accelY.startValue,
+                accelYMax = config.accelY.endValue,
+                angleMin = config.angle.startValue,
+                angleMax = config.angle.endValue,
+                rotationMin = config.rotation.startValue,
+                rotationMax = config.rotation.endValue,
+                rotationSpeedMin = config.rotationSpeed.startValue,
+                rotationSpeedMax = config.rotationSpeed.endValue,
+                duration = config.particleDuration,
+                fadeOutDuration = config.particleFadeOutDuration,
+                onParticleEnd = { particlesToRemove.add(it) }
             )
         }
 

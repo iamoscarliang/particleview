@@ -6,6 +6,7 @@ import android.os.Parcelable
 import com.oscarliang.particleview.core.model.FloatOffset
 import com.oscarliang.particleview.core.model.Image
 import com.oscarliang.particleview.core.model.IntOffset
+import com.oscarliang.particleview.core.util.aspectRatio
 import com.oscarliang.particleview.core.util.nextFloatSafely
 import com.oscarliang.particleview.core.util.nextIntSafely
 import kotlinx.parcelize.Parcelize
@@ -33,11 +34,8 @@ data class Particle(
     val rotationSpeedMax: Float,
     val duration: Long,
     val fadeOutDuration: Long,
-    val density: Float,
     val onParticleEnd: (Particle) -> Unit
 ) : Parcelable {
-
-    val width = image.size * density
 
     var positionX = 0.0f
     var positionY = 0.0f
@@ -93,9 +91,15 @@ data class Particle(
         }
     }
 
-    fun draw(bitmapPool: BitmapPool, canvas: Canvas, paint: Paint) {
+    fun draw(
+        bitmapPool: BitmapPool,
+        canvas: Canvas,
+        paint: Paint,
+        density: Float
+    ) {
         val bitmap = bitmapPool.get(image.imageId) ?: return
-        val height = width * (bitmap.height / bitmap.width)
+        val width = image.size * density
+        val height = width * bitmap.aspectRatio()
         val scale = width / bitmap.width
         canvas.save()
         canvas.translate(positionX - width / 2, positionY - height / 2)
