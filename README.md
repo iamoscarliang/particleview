@@ -43,17 +43,21 @@ XML
 
 ```kotlin
 particleView.start(
-    images = listOf(
-        Image(
-            imageId = R.drawable.particle,
-            size = 30
+    configs = listOf(
+        ParticleConfig(
+            images = listOf(
+                Image(
+                    imageId = R.drawable.particle,
+                    size = 30
+                )
+            ),
+            startX = FloatOffset(0.0f, 1.0f),
+            startY = FloatOffset(0.0f, 1.0f),
+            angle = IntOffset(-30, 30),
+            speed = FloatOffset(300.0f, 600.0f),
+            particlePerSecond = 20,
         )
     ),
-    startX = FloatOffset(0.0f, 1.0f),
-    startY = FloatOffset(0.0f, 1.0f),
-    angle = IntOffset(-30, 30),
-    speed = FloatOffset(300.0f, 600.0f),
-    particlePerSecond = 20,
     duration = 5000
 )
 ```
@@ -62,17 +66,21 @@ Compose
 ```kotlin
 ParticleView(
     modifier = Modifier.fillMaxSize(),
-    images = listOf(
-        Image(
-            imageId = R.drawable.particle,
-            size = 30
-        ),
+    configs = listOf(
+        ParticleConfig(
+            images = listOf(
+                Image(
+                    imageId = R.drawable.particle,
+                    size = 30
+                )
+            ),
+            startX = FloatOffset(0.0f, 1.0f),
+            startY = FloatOffset(0.0f, 1.0f),
+            angle = IntOffset(-30, 30),
+            speed = FloatOffset(300.0f, 600.0f),
+            particlePerSecond = 20,
+        )
     ),
-    startX = FloatOffset(0.0f, 1.0f),
-    startY = FloatOffset(0.0f, 1.0f),
-    angle = IntOffset(-30, 30),
-    speed = FloatOffset(300.0f, 600.0f),
-    particlePerSecond = 20,
     duration = 5000
 )
 ```
