@@ -91,13 +91,11 @@ class ParticleView : View {
             }
         })
 
-        configs.forEach { particleSystem ->
-            particleSystem.images.forEach {
-                bitmapPool.put(
-                    bitmap = loadBitmap(context, it.imageId),
-                    id = it.imageId
-                )
-            }
+        configs.flatMap { it.images }.forEach {
+            bitmapPool.put(
+                bitmap = loadBitmap(context, it.imageId),
+                id = it.imageId
+            )
         }
     }
 
